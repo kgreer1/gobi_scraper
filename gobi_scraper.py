@@ -12,6 +12,9 @@ https://github.com/kchasefray/GOBI_Searching
 import pandas as pd
 import re
 from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import gobi_config
 
 #establish webdriver
@@ -46,42 +49,43 @@ isbn_list = file['isbn'].values
 #for i in range(0, len(isbn_list) - 1):
 
 #find search box
-searchElem = browser.find_element_by_id('basicsearchinput')
+searchElem = WebDriverWait(browser,10).until(EC.visibility_of_element_located((By.ID, 'basicsearchinput')))
+#clear search box input field
+searchElem.clear()
 #input isbn from list
 searchElem.send_keys(isbn_list[0])
 #submit
 searchElem.submit()
 
-#find all results on results page
-itemElem = browser.find_elements_by_id('containeritems')
+#wait for results page to load and find all results on results page
+itemElem = WebDriverWait(browser, 10).until(EC.visibility_of_all_elements_located((By.XPATH, '//div[@id="containeritems"]/div')))
 
-print(itemElem)
+#iterate through results and transform each web element into a text element
+for item in itemElem:
+    individual_item = item.text
+    print(individual_item)
 
-# #iterate through results and transform each web element into a text element
-# for item in itemElem:
-#     individual_item = item.text
+    #regex to find price
+    priceRegex = re.compile(r'(\d+(?:\.\d+)\s)')
+    rawprice = priceRegex.search(str(individual_item))
+    price = rawprice.group()
 
-#     #regex to find price
-#     priceRegex = re.compile(r'(\d+(?:\.\d+)\s)')
-#     rawprice = priceRegex.search(str(individual_item))
-#     price = rawprice.group()
+    #regex to find binding (ebook, cloth, paper)
+    bindingRegex = re.compile(r'Binding:(\w+)')
+    ebookorprint = bindingRegex.search(str(individual_item))
+    binding = ebookorprint.group()
 
-#     #regex to find binding (ebook, cloth, paper)
-#     bindingRegex = re.compile(r'Binding:(\w+)')
-#     ebookorprint = bindingRegex.search(str(individual_item))
-#     binding = ebookorprint.group()
+    #append resuls to list
+    binding_list.append(binding)
+    price_list.append(price)
 
-#     #append resuls to list
-#     binding_list.append(binding)
-#     price_list.append(price)
+#add lists to results dictionary
+#choices.update({'isbn': isbn_list})
+choices.update({'binding': binding_list})
+choices.update({'price': price_list})
 
-# #add lists to results dictionary
-# #choices.update({'isbn': isbn_list})
-# choices.update({'binding': binding_list})
-# choices.update({'price': price_list})
-
-# #create df of choices dictionary
-# df = pd.DataFrame.from_dict(choices)
-# #df.groupby('isbn')
-# #send to excel file
-# df.to_excel(gobi_config.output_file)
+#create df of choices dictionary
+df = pd.DataFrame.from_dict(choices)
+#df.groupby('isbn')
+#send to excel file
+df.to_excel(gobi_config.output_file)

@@ -1,2 +1,7 @@
+#ignore log file
 *.log
+
+#ignore config file
 gobi_config.py
+
+__pycache__/
