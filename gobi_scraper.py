@@ -34,10 +34,13 @@ passwordElem.submit()
 
 #create empty lists
 isbn_list = []
-binding_list = []
-price_list = []
+result_title_list = []
+result_isbn_list = []
+result_binding_list = []
+result_price_list = []
 
-choices = {}
+#create empty dictonary for results
+results = {}
 
 #read in ISBNs from file
 file = pd.read_excel(gobi_config.input_file, index_col=0, dtype={'isbn': 'str'})
@@ -65,6 +68,11 @@ for item in itemElem:
     individual_item = item.text
     print(individual_item)
 
+    #regex to find isbn
+    isbnRegex = re.compile(r'ISBN:(\d+)')
+    rawisbn = isbnRegex.search(str(individual_item))
+    isbn = rawisbn.group()
+
     #regex to find price
     priceRegex = re.compile(r'(\d+(?:\.\d+)\s)')
     rawprice = priceRegex.search(str(individual_item))
@@ -75,17 +83,21 @@ for item in itemElem:
     ebookorprint = bindingRegex.search(str(individual_item))
     binding = ebookorprint.group()
 
-    #append resuls to list
-    binding_list.append(binding)
-    price_list.append(price)
+    #append results to list
+    result_isbn_list.append(isbn)
+    result_binding_list.append(binding)
+    result_price_list.append(price)
 
 #add lists to results dictionary
-#choices.update({'isbn': isbn_list})
-choices.update({'binding': binding_list})
-choices.update({'price': price_list})
+results.update({'isbn': result_isbn_list})
+results.update({'binding': result_binding_list})
+results.update({'price': result_price_list})
 
-#create df of choices dictionary
-df = pd.DataFrame.from_dict(choices)
-#df.groupby('isbn')
-#send to excel file
+print(results)
+
+#create dataframe of choices dictionary
+df = pd.DataFrame.from_dict(results)
+df.groupby('isbn')
+
+#send results to excel file
 df.to_excel(gobi_config.output_file)
