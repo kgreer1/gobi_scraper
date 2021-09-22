@@ -71,25 +71,34 @@ for item in itemElem:
     #regex to find isbn
     isbnRegex = re.compile(r'ISBN:(\d+)')
     rawisbn = isbnRegex.search(str(individual_item))
-    isbn = rawisbn.group()
+    isbn = rawisbn.group(1)
+
+    #regex to find title
+    titleRegex = re.compile(r'Title:(.+)')
+    rawtitle = titleRegex.search(str(individual_item))
+    print(rawtitle)
+    title = rawtitle.group(1)
+    print(title)
 
     #regex to find price
     priceRegex = re.compile(r'(\d+(?:\.\d+)\s)')
     rawprice = priceRegex.search(str(individual_item))
-    price = rawprice.group()
+    price = rawprice.group(1)
 
     #regex to find binding (ebook, cloth, paper)
     bindingRegex = re.compile(r'Binding:(\w+)')
     ebookorprint = bindingRegex.search(str(individual_item))
-    binding = ebookorprint.group()
+    binding = ebookorprint.group(1)
 
     #append results to list
     result_isbn_list.append(isbn)
+    result_title_list.append(title)
     result_binding_list.append(binding)
     result_price_list.append(price)
 
 #add lists to results dictionary
 results.update({'isbn': result_isbn_list})
+results.update({'title': result_title_list})
 results.update({'binding': result_binding_list})
 results.update({'price': result_price_list})
 
