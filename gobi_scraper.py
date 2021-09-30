@@ -9,12 +9,14 @@ https://github.com/kchasefray/GOBI_Searching
 
 """
 
-import pandas as pd
-import re
+#!/usr/bin/env python3
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import pandas as pd
+import re
 import gobi_config
 
 #establish webdriver
@@ -49,10 +51,10 @@ file = pd.read_excel(gobi_config.input_file, index_col=0, dtype={'isbn': 'str'})
 isbn_list = file['isbn'].values
 
 #iterate through list searching for each isbn in GOBI
-#for i in range(0, len(isbn_list) - 1):
+#for i in range(len(isbn_list)):
 
 #find search box
-searchElem = WebDriverWait(browser,10).until(EC.visibility_of_element_located((By.ID, 'basicsearchinput')))
+searchElem = WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.ID, 'basicsearchinput')))
 #clear search box input field
 searchElem.clear()
 #input isbn from list
@@ -61,7 +63,10 @@ searchElem.send_keys(isbn_list[0])
 searchElem.submit()
 
 #wait for results page to load and find all results on results page
-itemElem = WebDriverWait(browser, 10).until(EC.visibility_of_all_elements_located((By.XPATH, '//div[@id="containeritems"]/div')))
+try:
+    itemElem = WebDriverWait(browser, 10).until(EC.visibility_of_all_elements_located((By.XPATH, '//div[@id="containeritems"]/div')))
+except:
+    print("An error occurred")
 
 #iterate through results and transform each web element into a text element
 for item in itemElem:
@@ -76,9 +81,7 @@ for item in itemElem:
     #regex to find title
     titleRegex = re.compile(r'Title:(.+)')
     rawtitle = titleRegex.search(str(individual_item))
-    print(rawtitle)
     title = rawtitle.group(1)
-    print(title)
 
     #regex to find price
     priceRegex = re.compile(r'(\d+(?:\.\d+)\s)')
@@ -102,7 +105,7 @@ results.update({'title': result_title_list})
 results.update({'binding': result_binding_list})
 results.update({'price': result_price_list})
 
-print(results)
+#print(results)
 
 #create dataframe of choices dictionary
 df = pd.DataFrame.from_dict(results)
