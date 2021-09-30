@@ -2,9 +2,9 @@
 Kat Greer
 Agnes Scott College
 
-The file scrapes GOBI for print and ebook pricing.
+This python script scrapes GOBI for print and ebook pricing.
 
-Adapted from python file created by Katharine Frazier, NC State University Libraries
+Adapted from python script created by Katharine Frazier, NC State University Libraries
 https://github.com/kchasefray/GOBI_Searching
 
 """
