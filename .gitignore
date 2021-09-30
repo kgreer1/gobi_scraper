@@ -4,4 +4,5 @@
 #ignore config file
 gobi_config.py
 
+#ignore __pycache__ folder
 __pycache__/
